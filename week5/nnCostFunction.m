@@ -67,7 +67,7 @@ t2 = Theta2(:, 2:size(Theta2,2));
 
 factor_reg = lambda / (2*m) * (sum( sum ( t1.^ 2 )) + sum( sum ( t2.^ 2 )));
 
-J = J * factor_reg;
+J = J + factor_reg;
 
 % Part 2: Implement the backpropagation algorithm to compute the gradients
 %         Theta1_grad and Theta2_grad. You should return the partial derivatives of
@@ -76,13 +76,42 @@ J = J * factor_reg;
 %         that your implementation is correct by running checkNNGradients
 %
 %         Note: The vector y passed into the function is a vector of labels
-%               containing values from 1..K. You need to map this vector into a 
-%               binary vector of 1's and 0's to be used with the neural network
-%               cost function.
-%
+%               containing values from 1..K. You need to map this vector into a %               binary vector of 1's and 0's to be used with the neural network %               cost function.  %
 %         Hint: We recommend implementing backpropagation using a for-loop
 %               over the training examples if you are implementing it for the 
 %               first time.
+ for t = 1:m 
+    A1 = X(t, :)'; % 401x1
+
+    Z2 = Theta1 * A1; % 25x1
+    H1 = sigmoid(Theta1 * A1); %25x1
+
+    A2 = [1; H1]; % 26 x 1
+
+    Z3 = Theta2 * A2;
+    A3 = sigmoid(Z3); %10x1
+
+% Step 2: calculate diff between expected and actual answer
+
+  delta3 = A3 - Y_new(:,t); %10x1
+
+% Step 3
+  Z2 = [1 ; Z2]; %26x1
+
+  delta2 = (Theta2' * delta3) .* sigmoidGradient(Z2); % 26x1
+
+% Step 4 
+  delta2 = delta2(2:end);
+
+
+  Theta2_grad = Theta2_grad + delta3*A2'; 
+
+  Theta1_grad = Theta1_grad + delta2*A1';
+
+ endfor 
+
+  Theta2_grad = (1/m) * Theta2_grad; % (10*26)
+  Theta1_grad = (1/m) * Theta1_grad; % (25*401)
 %
 % Part 3: Implement regularization with the cost function and gradients.
 %
@@ -93,37 +122,14 @@ J = J * factor_reg;
 %
 
 
-% cost function with regularization 
+Theta1_grad(:, 2:end) = Theta1_grad(:, 2:end) + (lambda/m)*Theta1(:, 2:end)
+Theta2_grad(:, 2:end) = Theta2_grad(:, 2:end) + (lambda/m)*Theta2(:, 2:end)
 
-% Backtracing
-
-% for t = 1:m 
-%     A1 = X(t, :); % 1x400
-%     A1 = [1; A1'];% 401x1 
-%     
-%     Z1 = A1'*Theta1';
-%     A2 = sigmoid(Z1)'; % 25x1
-%     A2 = [1; A2]; % 26x1
-% 
-%     Z2 = A2'*Theta2';
-%     A3 = sigmoid(A2'*Theta2')'; %10x1 
-% 
-%     delta3 = A3 - Y_t(t, :)'; %10x1
-% 
-%     delta2 = (Theta2'*delta3); % 26x1
-%     size(delta2);
-% 
-%     Theta2_grad  = Theta2_grad + delta3*(A2)'; %10x26
-%     Theta1_grad = Theta1_grad + delta2(2:end)*(A1)'; %25x401
-% endfor 
-% 
-% Theta1_grad = (1/m)*Theta1_grad;
-% Theta2_grad = (1/m)*Theta2_grad;
 
 % =========================================================================
 
 % Unroll gradients
-% grad = [Theta1_grad(:) ; Theta2_grad(:)];
+ grad = [Theta1_grad(:) ; Theta2_grad(:)];
 
 
 end

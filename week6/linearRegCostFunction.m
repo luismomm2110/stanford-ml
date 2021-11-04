@@ -28,7 +28,7 @@ H = X*theta; % 12x1
 J = (1/(2*m))*(sum((H-y).^2))  + (lambda/(2*m))*(sum(theta(2:end).^2));
 
 theta_reg = [0; theta(2:end)];
-grad = (1/m)*(H-y)'*X + (lambda/m)*(theta_reg)'
+grad = (1/m)*(H-y)'*X + (lambda/m)*(theta_reg)';
 
 
 % =========================================================================
